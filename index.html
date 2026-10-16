@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConstiXLL</title>
+<style>
+:root {
+  --green: #39ff14;
+  --bg: #080b09;
+  --panel: #111713;
+  --text: #f4fff4;
+  --muted: #a7b5a9;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+header {
+  padding: 25px 16px;
+  text-align: center;
+  border-bottom: 1px solid #24452a;
+  background: #090e0a;
+}
+.logo {
+  font-size: clamp(30px, 7vw, 48px);
+  font-weight: 900;
+  color: var(--green);
+  text-shadow: 0 0 15px #39ff1466;
+}
+header p { color: var(--muted); margin-bottom: 0; }
+main { width: min(1050px, 92%); margin: 28px auto; }
+h2 { color: var(--green); }
+h3 { margin-top: 0; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid #2c4530;
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.creator { border-top: 4px solid var(--green); }
+.admin { border-top: 4px solid #54a8ff; }
+.member { border-top: 4px solid #b9c3bb; }
+.creator h3 { color: var(--green); }
+.admin h3 { color: #54a8ff; }
+p, li { line-height: 1.55; }
+.muted { color: var(--muted); }
+label { display: block; margin: 12px 0 6px; }
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  color: white;
+  background: #080c09;
+  border: 1px solid #3b5140;
+  border-radius: 8px;
+  font-size: 16px;
+}
+textarea { min-height: 90px; resize: vertical; }
+button {
+  padding: 12px 16px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--green);
+  color: #071007;
+  font-weight: bold;
+  cursor: pointer;
+}
+button.blue { background: #54a8ff; }
+button.secondary {
+  background: #263229;
+  color: white;
+  border: 1px solid #455b49;
+}
+.status { color: var(--green); overflow-wrap: anywhere; }
+.notice {
+  padding: 12px;
+  border-radius: 8px;
+  background: #1b251d;
+  color: #d8e8da;
+  margin-top: 12px;
+}
+hr { border: 0; border-top: 1px solid #2c4530; margin: 25px 0; }
+.hidden { display: none; }
+#videoFrame { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 10px; }
+footer { text-align: center; color: var(--muted); padding: 28px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ConstiXLL</div>
+  <p>Your gaming space. Your content. Your community.</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Welcome to ConstiXLL</h2>
+    <p class="muted">Choose the access type you need. Creator and Admin access have separate applications and approval processes.</p>
+  </section>
+
+  <div class="grid">
+    <section class="card member">
+      <h3>Member Login</h3>
+      <p>Member access does not require a quote or application.</p>
+      <label for="memberName">Username</label>
+      <input id="memberName" placeholder="Enter a username">
+      <button onclick="memberLogin()">Enter as Member</button>
+      <p id="memberStatus" class="status"></p>
+    </section>
+
+    <section class="card creator">
+      <h3>Creator Access</h3>
+      <p>Apply separately to become a Creator. The site owner reviews Creator applications.</p>
+      <label for="creatorName">Your username</label>
+      <input id="creatorName" placeholder="Enter a username">
+      <label for="creatorQuote">Creator application / quote</label>
+      <textarea id="creatorQuote" placeholder="Tell us why you want Creator access"></textarea>
+      <button onclick="applyFor('Creator')">Submit Creator Application</button>
+      <p id="creatorStatus" class="status"></p>
+    </section>
+
+    <section class="card admin">
+      <h3>Admin Access</h3>
+      <p>Admin access is separate from Creator access. An approved Creator must review your application.</p>
+      <label for="adminName">Your username</label>
+      <input id="adminName" placeholder="Enter a username">
+      <label for="adminQuote">Admin application / quote</label>
+      <textarea id="adminQuote" placeholder="Explain why you want Admin access"></textarea>
+      <button class="blue" onclick="applyFor('Admin')">Submit Admin Application</button>
+      <p id="adminStatus" class="status"></p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>YouTube Player</h2>
+    <p class="muted">Paste a YouTube video, Short, or supported live-stream link to watch it here.</p>
+    <label for="youtubeUrl">YouTube link</label>
+    <input id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=...">
+    <button onclick="playVideo()">Play Video</button>
+    <p id="videoStatus" class="status"></p>
+    <div id="videoContainer"></div>
+  </section>
+
+  <hr>
+
+  <section class="card creator">
+    <h2>Creator Review</h2>
+    <p class="muted">Demo review area: approved Creators can review Admin applications. Admins cannot approve other Admins.</p>
+    <label for="reviewerName">Reviewer username</label>
+    <input id="reviewerName" placeholder="Enter your approved Creator username">
+    <button onclick="showReviews('Admin')">View Admin Applications</button>
+    <div id="adminReviews"></div>
+  </section>
+
+  <section class="card">
+    <h2>Owner Review</h2>
+    <p class="muted">The site owner reviews Creator applications. This demo uses a locally configured owner name; it is not secure authentication.</p>
+    <label for="ownerName">Owner username</label>
+    <input id="ownerName" placeholder="Enter the configured owner username">
+    <button onclick="showReviews('Creator')">View Creator Applications</button>
+    <div id="creatorReviews"></div>
+  </section>
+
+  <section class="card">
+    <h2>My Application Status</h2>
+    <label for="statusName">Username</label>
+    <input id="statusName" placeholder="Enter your application username">
+    <button class="secondary" onclick="checkStatus()">Check Status</button>
+    <div id="statusResult"></div>
+  </section>
+</main>
+
+<footer>ConstiXLL · Gaming Community</footer>
+
+<script>
+/*
+ DEMO ONLY:
+ Applications are stored in this browser using localStorage.
+ Real shared accounts and secure role approvals require a backend.
+*/
+const OWNER_USERNAME = "siteowner";
+
+function getApplications() {
+  try {
+    return JSON.parse(localStorage.getItem("constixllApplications") || "[]");
+  } catch {
+    return [];
+  }
+}
+function saveApplications(items) {
+  localStorage.setItem("constixllApplications", JSON.stringify(items));
+}
+function getRoles() {
+  try {
+    return JSON.parse(localStorage.getItem("constixllRoles") || "{}");
+  } catch {
+    return {};
+  }
+}
+function saveRoles(roles) {
+  localStorage.setItem("constixllRoles", JSON.stringify(roles));
+}
+function clean(value) {
+  return String(value || "").trim();
+}
+function memberLogin() {
+  const name = clean(document.getElementById("memberName").value);
+  const out = document.getElementById("memberStatus");
+  if (!name) {
+    out.textContent = "Enter a username first.";
+    return;
+  }
+  out.textContent = "Member access selected for " + name + ".";
+}
+function applyFor(type) {
+  const isCreator = type === "Creator";
+  const name = clean(document.getElementById(isCreator ? "creatorName" : "adminName").value);
+  const quote = clean(document.getElementById(isCreator ? "creatorQuote" : "adminQuote").value);
+  const out = document.getElementById(isCreator ? "creatorStatus" : "adminStatus");
+
+  if (!name || !quote) {
+    out.textContent = "Please enter your username and application.";
+    return;
+  }
+  const apps = getApplications();
+  apps.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    username: name,
+    type,
+    quote,
+    status: "Pending",
+    date: new Date().toLocaleString()
+  });
+  saveApplications(apps);
+  out.textContent = type + " application submitted. Status: Pending.";
+}
+function showReviews(type) {
+  const isAdminReview = type === "Admin";
+  const reviewer = clean(document.getElementById(isAdminReview ? "reviewerName" : "ownerName").value);
+  const target = document.getElementById(isAdminReview ? "adminReviews" : "creatorReviews");
+
+  if (!reviewer) {
+    target.textContent = isAdminReview
+      ? "Enter your approved Creator username."
+      : "Enter the configured owner username.";
+    return;
+  }
+
+  const roles = getRoles();
+  if (isAdminReview && roles[reviewer] !== "Creator") {
+    target.textContent = "Only an approved Creator can review Admin applications.";
+    return;
+  }
+  if (!isAdminReview && reviewer.toLowerCase() !== OWNER_USERNAME.toLowerCase()) {
+    target.textContent = "Only the configured site owner can review Creator applications.";
+    return;
+  }
+
+  const apps = getApplications().filter(app => app.type === type && app.status === "Pending");
+  target.replaceChildren();
+
+  if (!apps.length) {
+    target.textContent = "No pending " + type + " applications.";
+    return;
+  }
+
+  apps.forEach(app => {
+    const box = document.createElement("div");
+    box.className = "notice";
+
+    const title = document.createElement("strong");
+    title.textContent = app.username + " — " + app.type;
+    box.appendChild(title);
+
+    const quote = document.createElement("p");
+    quote.textContent = app.quote;
+    box.appendChild(quote);
+
+    const date = document.createElement("small");
+    date.textContent = "Submitted: " + app.date;
+    box.appendChild(date);
+
+    ["Approve", "Reject"].forEach(decision => {
+      const btn = document.createElement("button");
+      btn.textContent = decision;
+      btn.className = decision === "Reject" ? "secondary" : (isAdminReview ? "blue" : "");
+      btn.onclick = () => decide(app.id, decision, type, reviewer);
+      box.appendChild(btn);
+    });
+
+    target.appendChild(box);
+  });
+}
+function decide(id, decision, type, reviewer) {
+  const isAdminReview = type === "Admin";
+  const roles = getRoles();
+
+  // Recheck permissions when the decision is made.
+  if (isAdminReview && roles[reviewer] !== "Creator") {
+    alert("Only an approved Creator can approve Admin applications.");
+    return;
+  }
+  if (!isAdminReview && reviewer.toLowerCase() !== OWNER_USERNAME.toLowerCase()) {
+    alert("Only the configured site owner can approve Creator applications.");
+    return;
+  }
+
+  const apps = getApplications();
+  const app = apps.find(item => item.id === id && item.type === type && item.status === "Pending");
+  if (!app) {
+    alert("This application is no longer pending.");
+    return;
+  }
+
+  app.status = decision === "Approve" ? "Approved" : "Rejected";
+  app.reviewedBy = reviewer;
+  saveApplications(apps);
+
+  if (decision === "Approve") {
+    roles[app.username] = type;
+    saveRoles(roles);
+  }
+  showReviews(type);
+}
+function checkStatus() {
+  const name = clean(document.getElementById("statusName").value);
+  const result = document.getElementById("statusResult");
+  result.replaceChildren();
+
+  if (!name) {
+    result.textContent = "Enter your username.";
+    return;
+  }
+  const matches = getApplications().filter(app =>
+    app.username.toLowerCase() === name.toLowerCase()
+  );
+
+  if (!matches.length) {
+    result.textContent = "No applications found for this username.";
+    return;
+  }
+  matches.forEach(app => {
+    const p = document.createElement("p");
+    p.textContent = app.type + " application: " + app.status;
+    result.appendChild(p);
+  });
+}
+function playVideo() {
+  const raw = clean(document.getElementById("youtubeUrl").value);
+  const status = document.getElementById("videoStatus");
+  const container = document.getElementById("videoContainer");
+  container.replaceChildren();
+
+  try {
+    const url = new URL(raw);
+    let id = "";
+
+    if (url.hostname === "youtu.be" || url.hostname === "www.youtu.be") {
+      id = url.pathname.split("/").filter(Boolean)[0] || "";
+    } else if (
+      ["youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"].includes(url.hostname)
+    ) {
+      if (url.pathname === "/watch") id = url.searchParams.get("v") || "";
+      else if (/^\/(shorts|embed|live)\//.test(url.pathname)) {
+        id = url.pathname.split("/")[2] || "";
+      }
+    }
+
+    if (!/^[a-zA-Z0-9_-]{11}$/.test(id)) {
+      status.textContent = "That link doesn't look like a supported YouTube video link.";
+      return;
+    }
+
+    const frame = document.createElement("iframe");
+    frame.id = "videoFrame";
+    frame.src = "https://www.youtube.com/embed/" + id;
+    frame.title = "YouTube video player";
+    frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    frame.allowFullscreen = true;
+    container.appendChild(frame);
+    status.textContent = "";
+  } catch {
+    status.textContent = "Please enter a valid YouTube link.";
+  }
+}
+</script>
+</body>
+</html>
+
+Important: This is a browser-only demo. Applications and roles are saved on the current browser, not shared securely between devices. For real accounts and reliable approvals, ConstiXLL needs a server-side login and database.
